@@ -1,0 +1,12 @@
+{
+  "name": "support-matching-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nationwide support program matching website",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

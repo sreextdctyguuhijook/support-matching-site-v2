@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1769aa">
+<title>내 조건에 맞는 지원금 찾기</title>
+
+<style>
+:root {
+  --blue: #1769aa;
+  --deep: #104f83;
+  --pale: #edf6ff;
+  --line: #dce7f1;
+  --ink: #203247;
+  --muted: #65788b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #f5f8fc;
+  color: var(--ink);
+  font-family: Arial, "Noto Sans KR", sans-serif;
+}
+
+header {
+  background: linear-gradient(120deg, #1769aa, #278bd0);
+  color: white;
+  padding: 38px 20px 55px;
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: auto;
+  padding: 0 18px;
+}
+
+.topline { font-size: 13px; opacity: .9; }
+
+h1 {
+  font-size: clamp(26px, 4vw, 36px);
+  margin: 12px 0 8px;
+}
+
+.sub { line-height: 1.7; opacity: .93; }
+
+main {
+  margin-top: -24px;
+  padding-bottom: 50px;
+}
+
+.panel, .result-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 5px 22px #173b5b0b;
+}
+
+.panel {
+  padding: 24px;
+  margin-bottom: 22px;
+}
+
+.panel h2 {
+  font-size: 20px;
+  margin: 0 0 20px;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.field select,
+.field input {
+  width: 100%;
+  height: 45px;
+  border: 1px solid #ccd9e5;
+  border-radius: 9px;
+  padding: 0 12px;
+  background: white;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 13px 19px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.primary {
+  background: var(--blue);
+  color: white;
+}
+
+.secondary {
+  background: #edf2f7;
+  color: #354b60;
+}
+
+.result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 25px 2px 15px;
+  flex-wrap: wrap;
+}
+
+.result-head h2 {
+  font-size: 21px;
+  margin: 0;
+}
+
+.count {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.result-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 215px;
+}
+
+.tag {
+  display: inline-block;
+  background: var(--pale);
+  color: var(--deep);
+  font-size: 12px;
+  font-weight: bold;
+  padding: 6px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  align-self: flex-start;
+}
+
+.result-card h3 {
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.description {
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 12px 0 16px;
+  color: #43576a;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-bottom {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.small-btn {
+  border: 1px solid #b8d4e9;
+  color: var(--deep);
+  background: white;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.state {
+  background: white;
+  border: 1px dashed #c9d8e5;
+  border-radius: 14px;
+  padding: 32px 18px;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.8;
+  grid-column: 1 / -1;
+}
+
+.state strong {
+  display: block;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+
+.more-wrap {
+  text-align: center;
+  margin: 24px 0;
+}
+
+.notice {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin: 18px 2px;
+}
+
+footer {
+  text-align: center;
+  color: #718397;
+  font-size: 12px;
+  padding: 25px 18px;
+}
+
+/* 상세 모달 */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #10223599;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 100;
+}
+
+.modal-backdrop.open { display: flex; }
+
+.modal {
+  background: white;
+  width: min(680px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 20px 70px #0003;
+}
+
+.modal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal h2 {
+  font-size: 21px;
+  line-height: 1.5;
+  margin: 0 0 15px;
+}
+
+.modal-content {
+  white-space: pre-wrap;
+  line-height: 1.8;
+  font-size: 14px;
+  color: #43576a;
+  overflow-wrap: anywhere;
+}
+
+.close {
+  border: 0;
+  background: #edf2f7;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 21px;
+  cursor: pointer;
+  flex: none;
+}
+
+.modal-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--blue);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid { grid-template-columns: 1fr; }
+  .panel { padding: 18px; }
+  .result-card { min-height: 0; }
+}
+
+@media (max-width: 430px) {
+  .filters { grid-template-columns: 1fr; }
+  .actions .btn { flex: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="topline">전국 지원사업 통합 검색</div>
+    <h1>내 조건에 맞는 지원금 찾기</h1>
+    <p class="sub">
+      여러 지원사업 공고를 한곳에서 확인하고<br>
+      내 상황에 맞는 지원 정보를 찾아보세요.
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="panel">
+  <h2>나에게 맞는 공고 검색</h2>
+
+  <div class="filters">
+
+    <div class="field">
+      <label for="category">지원 분야</label>
+      <select id="category">
+        <option value="">전체 분야</option>
+        <option>청년</option>
+        <option>소상공인</option>
+        <option>주거</option>
+        <option>출산·육아</option>
+        <option>취업</option>
+        <option>교육</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="region">거주 지역</label>
+      <select id="region">
+        <option value="">전국</option>
+        <option>서울</option>
+        <option>부산</option>
+        <option>대구</option>
+        <option>인천</option>
+        <option>광주</option>
+        <option>대전</option>
+        <option>울산</option>
+        <option>세종</option>
+        <option>경기</option>
+        <option>강원</option>
+        <option>충북</option>
+        <option>충남</option>
+        <option>전북</option>
+        <option>전남</option>
+        <option>경북</option>
+        <option>경남</option>
+        <option>제주</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="age">나이</label>
+      <select id="age">
+        <option value="">선택 안 함</option>
+        <option>10대</option>
+        <option>20대</option>
+        <option>30대</option>
+        <option>40대</option>
+        <option>50대</option>
+        <option>60대 이상</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="situation">현재 상황</label>
+      <select id="situation">
+        <option value="">선택 안 함</option>
+        <option>학생</option>
+        <option>구직자</option>
+        <option>재직자</option>
+        <option>창업자</option>
+        <option>소상공인</option>
+        <option>신혼부부</option>
+        <option>육아</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="income">가구 소득</label>
+      <select id="income">
+        <option value="">선택 안 함</option>
+        <option>저소득</option>
+        <option>중위소득 100% 이하</option>
+        <option>중위소득 150% 이하</option>
+        <option>소득 무관</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="keyword">검색어</label>
+      <input id="keyword" type="search" placeholder="예: 창업, 월세, 교육비">
+    </div>
+
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" id="searchBtn">
+      내 조건에 맞는 지원금 찾기
+    </button>
+    <button class="btn secondary" id="resetBtn">
+      조건 초기화
+    </button>
+  </div>
+</section>
+
+<div class="result-head">
+  <h2>지원사업 공고</h2>
+  <span class="count" id="count">공고를 불러오는 중...</span>
+</div>
+
+<div id="results" class="grid">
+  <div class="state">
+    <strong>공고 정보를 불러오고 있어요.</strong>
+    잠시만 기다려 주세요.
+  </div>
+</div>
+
+<div class="more-wrap">
+  <button class="btn secondary" id="moreBtn" hidden>더보기</button>
+</div>
+
+<p class="notice">
+  ※ 검색 결과는 공고 제목과 내용의 키워드를 기준으로 분류한 참고 정보입니다.
+  실제 신청 자격, 소득 기준, 신청 기간 및 지원 내용은 반드시 해당 기관의 공식 공고에서 확인하세요.
+</p>
+
+</main>
+
+<footer>
+  지원금 맞춤 매칭 서비스 · 정보 제공 목적의 서비스
+</footer>
+
+<!-- 상세 모달 -->
+<div class="modal-backdrop" id="modalBackdrop"
+     role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+  <div class="modal">
+    <div class="modal-top">
+      <h2 id="modalTitle"></h2>
+      <button class="close" id="closeModal" aria-label="닫기">×</button>
+    </div>
+
+    <div class="modal-content" id="modalContent"></div>
+
+    <a class="modal-link" id="modalLink"
+       target="_blank" rel="noopener noreferrer" hidden>
+      원문 공고 확인하기 ↗
+    </a>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let allPrograms = [];
+let filteredPrograms = [];
+let visibleCount = 20;
+
+const fields = {
+  category: "",
+  region: "",
+  age: "",
+  situation: "",
+  income: "",
+  keyword: ""
+};
+
+/* API에서 받은 HTML 태그 및 불필요한 공백 정리 */
+function cleanText(value) {
+  if (value == null) return "";
+
+  const element = document.createElement("div");
+  element.innerHTML = String(value);
+
+  return (element.textContent || element.innerText || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/* 여러 이름 중 실제 값이 존재하는 첫 번째 항목 찾기 */
+function firstValue(object, keys) {
+  for (const key of keys) {
+    if (object && object[key] != null && object[key] !== "") {
+      return object[key];
+    }
+  }
+  return "";
+}
+
+/* HTTP/HTTPS 주소만 허용 */
+function safeUrl(value) {
+  try {
+    const url = new URL(String(value));
+
+    if (url.protocol === "https:" || url.protocol === "http:") {
+      return url.href;
+    }
+  } catch (error) {}
+
+  return "";
+}
+
+/* API 공고 데이터 정리 */
+function normalizeProgram(item) {
+  const title = cleanText(firstValue(item, [
+    "title", "pbancNm", "pblancNm", "bizPbancNm", "사업명"
+  ])) || "제목 정보 없음";
+
+  const provider = cleanText(firstValue(item, [
+    "provider", "sprvsnInstNm", "jrsdInstNm", "기관명"
+  ]));
+
+  const start = cleanText(firstValue(item, [
+    "pbancBgngYmd", "aplyBgngYmd", "startDate", "beginDate"
+  ]));
+
+  const end = cleanText(firstValue(item, [
+    "pbancEndYmd", "aplyEndYmd", "endDate", "closeDate"
+  ]));
+
+  const content = cleanText(firstValue(item, [
+    "content", "pbancCn", "bsnsSumryCn",
+    "detailCn", "description", "sprtCn", "공고내용"
+  ]));
+
+  const url = safeUrl(firstValue(item, [
+    "applyUrl", "aplyUrlAddr", "detailUrl",
+    "pblancUrl", "dtlUrl", "url"
+  ]));
+
+  const searchText = [
+    title,
+    provider,
+    content,
+    item.area,
+    item.region,
+    item.target
+  ].map(cleanText).join(" ").toLowerCase();
+
+  return {
+    title,
+    provider,
+    period: [start, end].filter(Boolean).join(" ~ "),
+    content: content || "상세 내용은 원문 공고에서 확인해 주세요.",
+    url,
+    searchText
+  };
+}
+
+/* 화면에 표시할 문자열의 HTML 삽입 방지 */
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+/* 조건 검색 */
+function matchesProgram(program) {
+  const keyword = fields.keyword.trim().toLowerCase();
+
+  const filterKeys = [
+    "category",
+    "region",
+    "age",
+    "situation",
+    "income"
+  ];
+
+  for (const key of filterKeys) {
+    const value = fields[key];
+
+    if (value && !program.searchText.includes(value.toLowerCase())) {
+      return false;
+    }
+  }
+
+  return !keyword || program.searchText.includes(keyword);
+}
+
+/* 공고 목록 화면 표시 */
+function renderPrograms() {
+  filteredPrograms = allPrograms.filter(matchesProgram);
+
+  const visible = filteredPrograms.slice(0, visibleCount);
+
+  $("count").textContent =
+    `${filteredPrograms.length.toLocaleString("ko-KR")}건의 공고 · 전체 ${allPrograms.length.toLocaleString("ko-KR")}건`;
+
+  if (visible.length === 0) {
+    $("results").innerHTML = `
+      <div class="state">
+        <strong>
+          ${allPrograms.length
+            ? "조건에 맞는 공고가 없습니다."
+            : "공고 데이터를 표시할 수 없습니다."}
+        </strong>
+        ${allPrograms.length
+          ? "검색 조건을 바꾸거나 초기화해 보세요."
+          : "잠시 후 다시 시도해 주세요. API 연결 상태를 확인해야 합니다."}
+      </div>
+    `;
+  } else {
+    $("results").innerHTML = visible.map((program, index) => `
+      <article class="result-card">
+        <span class="tag">지원사업 공고</span>
+
+        <h3>${escapeHtml(program.title)}</h3>
+
+        <div class="meta">
+          ${escapeHtml(program.provider || "주관 기관 정보 없음")}
+          <br>
+          ${escapeHtml(program.period || "신청 기간 정보 없음")}
+        </div>
+
+        <p class="description">
+          ${escapeHtml(program.content)}
+        </p>
+
+        <div class="card-bottom">
+          <span class="meta">공고 ${index + 1}</span>
+
+          <button class="small-btn" data-detail="${index}">
+            공고 정보 보기
+          </button>
+        </div>
+      </article>
+    `).join("");
+
+    $("results")
+      .querySelectorAll("[data-detail]")
+      .forEach(button => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.detail);
+          openDetail(visible[index]);
+        });
+      });
+  }
+
+  $("moreBtn").hidden = visibleCount >= filteredPrograms.length;
+}
+
+/* 상세 모달 열기 */
+function openDetail(program) {
+  $("modalTitle").textContent = program.title;
+
+  $("modalContent").textContent = [
+    program.provider && `주관 기관: ${program.provider}`,
+    program.period && `신청 기간: ${program.period}`,
+    "",
+    program.content
+  ].filter(Boolean).join("\n");
+
+  $("modalLink").hidden = !program.url;
+
+  if (program.url) {
+    $("modalLink").href = program.url;
+  }
+
+  $("modalBackdrop").classList.add("open");
+  $("closeModal").focus();
+}
+
+function closeDetail() {
+  $("modalBackdrop").classList.remove("open");
+}
+
+/* 서버에서 실제 공고 불러오기 */
+async function loadPrograms() {
+  try {
+    const response = await fetch(
+      "/api/programs/social-enterprise",
+      { headers: { "Accept": "application/json" } }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || data.success === false) {
+      throw new Error(data.message || "API 응답 오류");
+    }
+
+    const rows = Array.isArray(data.items)
+      ? data.items
+      : Array.isArray(data.data)
+        ? data.data
+        : Array.isArray(data)
+          ? data
+          : [];
+
+    allPrograms = rows.map(normalizeProgram);
+
+  } catch (error) {
+    allPrograms = [];
+    console.error("공고 불러오기 실패:", error);
+  }
+
+  renderPrograms();
+}
+
+/* 검색 버튼 */
+$("searchBtn").addEventListener("click", () => {
+  for (const key in fields) {
+    fields[key] = $(key).value;
+  }
+
+  visibleCount = 20;
+  renderPrograms();
+});
+
+/* 조건 초기화 */
+$("resetBtn").addEventListener("click", () => {
+  for (const key in fields) {
+    fields[key] = "";
+    $(key).value = "";
+  }
+
+  visibleCount = 20;
+  renderPrograms();
+});
+
+/* 다음 공고 20개 표시 */
+$("moreBtn").addEventListener("click", () => {
+  visibleCount += 20;
+  renderPrograms();
+});
+
+/* 모달 닫기 */
+$("closeModal").addEventListener("click", closeDetail);
+
+$("modalBackdrop").addEventListener("click", event => {
+  if (event.target === $("modalBackdrop")) {
+    closeDetail();
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeDetail();
+  }
+});
+
+/* 페이지 진입 시 자동으로 공고 불러오기 */
+loadPrograms();
+</script>
+
+</body>
+</html>
